@@ -147,20 +147,36 @@ chatForm.addEventListener("submit", (e) => {
 
 const generateRoutineBtn = document.getElementById("generateRoutine");
 const SYSTEM_PROMPT = `You are a helpful skincare and beauty advisor. Based on the user's selected products (including brand, name, category, and description), generate a personalized and logically ordered routine. Keep it clear, concise, and tailored to the product functions. 
-You should only answer questions that relate to the generated routine or to topics like skincare, haircare, makeup, fragrance, and other related areas. If the user asks about unrelated topics, politely redirect them to focus on their routine or related beauty topics.`;
+You should only answer questions that relate to the generated routine or to topics like skincare, haircare, makeup, fragrance, and other related areas. If the user asks about unrelated topics, politely redirect them to focus on their routine or related beauty topics. You should also 
+be able to remember the user's previous questions and answers to provide more contextually relevant responses.`;
 
 let messageHistory = [
   { role: "system", content: SYSTEM_PROMPT }
 ];
+
+function formatMarkdown(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // bold with **
+    .replace(/\*(.*?)\*/g, '<strong>$1</strong>')       // bold with *
+    .replace(/\n/g, '<br>');
+}
+
+function renderMessages() {
+  chatWindow.innerHTML = messageHistory
+    .filter(m => m.role !== "system")
+    .map(m => {
+      if (m.role === "user") return `<div><strong>You:</strong> ${formatMarkdown(m.content)}</div>`;
+      if (m.role === "assistant") return `<div><strong>AI:</strong> ${formatMarkdown(m.content)}</div>`;
+    })
+    .join("");
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
 
 async function generateRoutine() {
   if (selectedProducts.length === 0) {
     chatWindow.innerHTML += `<p><strong>System:</strong> Please select some products first!</p>`;
     return;
   }
-
-  chatWindow.innerHTML += `<p><em>Generating your routine...</em></p>`;
-  chatWindow.scrollTop = chatWindow.scrollHeight;
 
   const productData = selectedProducts.map(({ name, brand, category, description }) => ({
     name,
@@ -172,6 +188,10 @@ async function generateRoutine() {
   const userMessage = `Here are the products: ${JSON.stringify(productData, null, 2)}\nPlease create a step-by-step routine using them.`;
   messageHistory.push({ role: "user", content: userMessage });
 
+  renderMessages();
+  chatWindow.innerHTML += `<p><em>Generating your routine...</em></p>`;
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -189,9 +209,7 @@ async function generateRoutine() {
     const result = await response.json();
     const aiMessage = result.choices[0].message.content;
     messageHistory.push({ role: "assistant", content: aiMessage });
-
-    chatWindow.innerHTML += `<div><strong>AI:</strong> ${aiMessage.replace(/\n/g, "<br>")}</div>`;
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+    renderMessages();
   } catch (error) {
     chatWindow.innerHTML += `<p style=\"color: red;\"><strong>Error:</strong> Failed to generate routine. Please try again later.</p>`;
     console.error("Routine generation error:", error);
@@ -202,18 +220,15 @@ async function generateRoutine() {
 
 generateRoutineBtn.addEventListener("click", generateRoutine);
 
-// Handle follow-up questions in chatForm
 chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const input = document.getElementById("userInput");
   const question = input.value.trim();
   if (!question) return;
 
-  chatWindow.innerHTML += `<div><strong>You:</strong> ${question}</div>`;
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-  input.value = "";
-
   messageHistory.push({ role: "user", content: question });
+  renderMessages();
+  input.value = "";
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -232,16 +247,13 @@ chatForm.addEventListener("submit", async (e) => {
     const result = await response.json();
     const aiMessage = result.choices[0].message.content;
     messageHistory.push({ role: "assistant", content: aiMessage });
-
-    chatWindow.innerHTML += `<div><strong>AI:</strong> ${aiMessage.replace(/\n/g, "<br>")}</div>`;
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+    renderMessages();
   } catch (error) {
     chatWindow.innerHTML += `<p style=\"color: red;\"><strong>Error:</strong> Failed to respond. Please try again later.</p>`;
     console.error("Follow-up error:", error);
   }
 });
 
-// Save and load selected products from localStorage
 function saveSelectedProducts() {
   localStorage.setItem("selectedProducts", JSON.stringify(selectedProducts));
 }
@@ -258,12 +270,10 @@ function loadSelectedProductsFromStorage() {
   }
 }
 
-// Load stored products on page load
 window.addEventListener("load", () => {
   loadSelectedProductsFromStorage();
 });
 
-// Add "Clear All" functionality to selected list UI
 function updateSelectedProductsList() {
   if (selectedProducts.length === 0) {
     selectedProductsList.innerHTML = `<div class="placeholder-message">No products selected yet.</div>`;
