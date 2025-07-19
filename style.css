@@ -232,6 +232,32 @@ body {
   gap: 10px;
 }
 
+
+.product-card.selected {
+  border: 2px solid #0078d7;
+  box-shadow: 0 0 8px #0078d733;
+}
+.selected-product-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.selected-product-item img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.remove-btn {
+  background: none;
+  border: none;
+  color: #d32f2f;
+  cursor: pointer;
+  font-size: 1.2em;
+  margin-left: auto;
+}
+
 .generate-btn {
   width: 100%;
   margin-top: 20px;
