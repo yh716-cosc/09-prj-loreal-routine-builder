@@ -200,9 +200,9 @@ async function generateRoutine() {
         "Authorization": `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4",
+        model: "gpt-4o-search-preview",
+        web_search_options:{},
         messages: messageHistory,
-        temperature: 0.7,
       }),
     });
 
@@ -238,9 +238,9 @@ chatForm.addEventListener("submit", async (e) => {
         "Authorization": `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4",
+        model: "gpt-4o-search-preview",
+        web_search_options:{},
         messages: messageHistory,
-        temperature: 0.7,
       }),
     });
 
@@ -273,6 +273,27 @@ function loadSelectedProductsFromStorage() {
 window.addEventListener("load", () => {
   loadSelectedProductsFromStorage();
 });
+
+// Add search functionality
+const searchInput = document.createElement("input");
+searchInput.placeholder = "Search by name or keyword...";
+searchInput.style.padding = "10px";
+searchInput.style.marginTop = "10px";
+searchInput.style.width = "100%";
+searchInput.addEventListener("input", async (e) => {
+  const keyword = e.target.value.toLowerCase();
+  const products = await loadProducts();
+  const selectedCategory = categoryFilter.value;
+  const filtered = products.filter(
+    (p) =>
+      (!selectedCategory || p.category === selectedCategory) &&
+      (p.name.toLowerCase().includes(keyword) ||
+       p.brand.toLowerCase().includes(keyword) ||
+       p.description.toLowerCase().includes(keyword))
+  );
+  displayProducts(filtered);
+});
+document.querySelector(".search-section").appendChild(searchInput);
 
 function updateSelectedProductsList() {
   if (selectedProducts.length === 0) {
@@ -328,3 +349,49 @@ function updateSelectedProductsList() {
     });
   });
 }
+
+// List of known RTL languages
+var rtlLangs = [ 
+  'ar', 'he', 'fa', 'ur', 'ps', 'sd', 'ug', 'yi'
+];
+
+// Check if a language is RTL
+function isRtlLang(lang) {
+  return rtlLangs.some(function(code) {
+    return lang && lang.toLowerCase().indexOf(code) === 0;
+  });
+}
+
+// Apply RTL layout styles
+function setRtlLayout() {
+  document.documentElement.setAttribute('dir', 'rtl');
+  document.body.setAttribute('dir', 'rtl');
+  document.body.classList.add('rtl');
+}
+
+// Apply LTR layout styles
+function setLtrLayout() {
+  document.documentElement.setAttribute('dir', 'ltr');
+  document.body.setAttribute('dir', 'ltr');
+  document.body.classList.remove('rtl');
+}
+
+// Get current html lang set by Google Translate
+function detectGoogleTranslateLang() {
+  return document.documentElement.getAttribute('lang');
+}
+
+// Detect and apply layout
+function checkAndApplyRtl() {
+  var lang = detectGoogleTranslateLang();
+  if (isRtlLang(lang)) {
+    setRtlLayout();
+  } else {
+    setLtrLayout();
+  }
+}
+
+// Initial check
+checkAndApplyRtl();
+// Continuous monitoring in case Google Translate switches dynamically
+setInterval(checkAndApplyRtl, 1000);
