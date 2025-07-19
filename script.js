@@ -156,8 +156,9 @@ let messageHistory = [
 
 function formatMarkdown(text) {
   return text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // bold with **
-    .replace(/\*(.*?)\*/g, '<strong>$1</strong>')       // bold with *
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
     .replace(/\n/g, '<br>');
 }
 
@@ -172,6 +173,46 @@ function renderMessages() {
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
+const CHAT_API_URL = "https://divine-frog-0677.huangyx1113.workers.dev";
+
+async function callAI() {
+  const loadingId = `loading-${Date.now()}`;
+  const loadingMessage = `<div id="${loadingId}"><em>Generating response...</em></div>`;
+  chatWindow.innerHTML += loadingMessage;
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+
+  try {
+    const response = await fetch(CHAT_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ messages: messageHistory }),
+    });
+
+    const result = await response.json();
+    const aiMessage = result.choices?.[0]?.message?.content || "[No response]";
+
+    messageHistory.push({ role: "assistant", content: aiMessage });
+
+    // ✅ 删除 loading 再 render 全部消息
+    const loadingEl = document.getElementById(loadingId);
+    if (loadingEl) loadingEl.remove();
+    renderMessages();
+
+  } catch (error) {
+    const loadingEl = document.getElementById(loadingId);
+    if (loadingEl) {
+      loadingEl.outerHTML = `<p style="color: red;"><strong>Error:</strong> Failed to get AI response.</p>`;
+    }
+    console.error("AI call error:", error);
+  }
+
+  saveSelectedProducts();
+}
+
+
+// 外部函数：调用 callAI()
 async function generateRoutine() {
   if (selectedProducts.length === 0) {
     chatWindow.innerHTML += `<p><strong>System:</strong> Please select some products first!</p>`;
@@ -189,69 +230,29 @@ async function generateRoutine() {
   messageHistory.push({ role: "user", content: userMessage });
 
   renderMessages();
-  chatWindow.innerHTML += `<p><em>Generating your routine...</em></p>`;
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-search-preview",
-        web_search_options:{},
-        messages: messageHistory,
-      }),
-    });
-
-    const result = await response.json();
-    const aiMessage = result.choices[0].message.content;
-    messageHistory.push({ role: "assistant", content: aiMessage });
-    renderMessages();
-  } catch (error) {
-    chatWindow.innerHTML += `<p style=\"color: red;\"><strong>Error:</strong> Failed to generate routine. Please try again later.</p>`;
-    console.error("Routine generation error:", error);
-  }
-
-  saveSelectedProducts();
+  callAI(); // ✅ 这里调用
 }
 
-generateRoutineBtn.addEventListener("click", generateRoutine);
+generateRoutineBtn.addEventListener("click", () => {
+  const userMessage = `Here are the products: ${JSON.stringify(
+    selectedProducts.map(({ name, brand, category, description }) => ({
+      name, brand, category, description
+    })), null, 2)}\nPlease create a step-by-step routine using them.`;
+
+  messageHistory.push({ role: "user", content: userMessage });
+  renderMessages();
+  callAI();
+});
 
 chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const input = document.getElementById("userInput");
   const question = input.value.trim();
   if (!question) return;
-
   messageHistory.push({ role: "user", content: question });
   renderMessages();
   input.value = "";
-
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-search-preview",
-        web_search_options:{},
-        messages: messageHistory,
-      }),
-    });
-
-    const result = await response.json();
-    const aiMessage = result.choices[0].message.content;
-    messageHistory.push({ role: "assistant", content: aiMessage });
-    renderMessages();
-  } catch (error) {
-    chatWindow.innerHTML += `<p style=\"color: red;\"><strong>Error:</strong> Failed to respond. Please try again later.</p>`;
-    console.error("Follow-up error:", error);
-  }
+  callAI();
 });
 
 function saveSelectedProducts() {

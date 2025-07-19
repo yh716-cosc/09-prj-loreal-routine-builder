@@ -1,4 +1,4 @@
-/* —— basic reset —— */
+/* —— basic reset —— */ 
 * {
   box-sizing: border-box;
   margin: 0;
@@ -34,6 +34,7 @@ body {
   font-size: 22px;
   font-weight: 500;
   margin-bottom: 10px;
+  color: #ff003b;
 }
 
 /* category filter */
@@ -47,22 +48,23 @@ body {
   width: 80%;
   padding: 16px;
   font-size: 18px;
-  border: 2px solid #000;
+  border: 2px solid #333;
   border-radius: 8px;
   cursor: pointer;
   background-color: white;
   font-weight: 500;
+  color: #333;
 }
 
 .search-section select:focus {
   outline: none;
-  border-color: #666;
+  border-color: #000000;
 }
 
 /* chat section */
 .chatbox {
   margin: 40px 0;
-  border: 2px solid #000;
+  border: 2px solid #000000;
   border-radius: 8px;
   padding: 26px;
 }
@@ -70,6 +72,7 @@ body {
 .chatbox h2 {
   font-size: 20px;
   margin-bottom: 20px;
+  color: #ff003b;
 }
 
 .chat-window {
@@ -87,7 +90,7 @@ body {
   width: 100%;
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: #e3a535;
   font-size: 18px;
 }
 
@@ -109,12 +112,12 @@ body {
 
 .chat-form input:focus {
   outline: none;
-  border-bottom-color: #000;
+  border-bottom-color: #e3a535;
 }
 
 .chat-form button {
   font-size: 18px;
-  background: #000;
+  background: #ff003b;
   color: #fff;
   border: none;
   padding: 12px;
@@ -128,11 +131,11 @@ body {
 }
 
 .chat-form button:hover {
-  background: #666666;
+  background: #e3a535;
 }
 
 .chat-form button:focus {
-  outline: 2px solid #000;
+  outline: 2px solid #ff003b;
   outline-offset: 2px;
 }
 
@@ -163,12 +166,12 @@ body {
 
 .site-footer a {
   margin: 0 8px;
-  color: #000;
+  color: #ff003b;
   text-decoration: none;
 }
 
 .site-footer a:hover {
-  color: #666666;
+  color: #e3a535;
 }
 
 /* products grid */
@@ -187,16 +190,10 @@ body {
   display: flex;
   gap: 15px;
   min-height: 160px;
-  cursor: pointer; /* Show hand cursor on hover */
+  cursor: pointer;
   transition: box-shadow 0.2s, border 0.2s;
-  position: relative; /* Needed for overlay positioning */
+  position: relative;
 }
-
-/*
-.product-card:hover {
-  box-shadow: 0 0 12px #0078d744;
-  border: 2px solid #0078d7;
-}*/
 
 .product-card img {
   width: 110px;
@@ -249,24 +246,23 @@ body {
   opacity: 1;
 }
 
-/* Optional: visually hide the rest of the card when overlay is shown */
 .product-card:hover > *:not(.product-description-overlay),
 .product-card:focus-within > *:not(.product-description-overlay) {
   opacity: 0.2;
   transition: opacity 0.2s;
 }
 
-/* selected products */
 .selected-products {
   margin: 40px 0;
   padding: 20px;
-  border: 2px solid #000;
+  border: 2px solid #000000;
   border-radius: 8px;
 }
 
 .selected-products h2 {
   font-size: 20px;
   margin-bottom: 20px;
+  color: #000;
 }
 
 #selectedProductsList {
@@ -275,27 +271,29 @@ body {
   gap: 10px;
 }
 
-
 .product-card.selected {
-  border: 2px solid #0078d7;
-  box-shadow: 0 0 8px #0078d733;
+  border: 2px solid #e3a535;
+  box-shadow: 0 0 8px #eeca88;
 }
+
 .selected-product-item {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
 }
+
 .selected-product-item img {
   width: 40px;
   height: 40px;
   object-fit: cover;
   border-radius: 4px;
 }
+
 .remove-btn {
   background: none;
   border: none;
-  color: #d32f2f;
+  color: #ff003b;
   cursor: pointer;
   font-size: 1.2em;
   margin-left: auto;
@@ -308,7 +306,7 @@ body {
   font-size: 18px;
   font-weight: 500;
   color: #fff;
-  background: #000;
+  background: #ff003b;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -316,7 +314,7 @@ body {
 }
 
 .generate-btn:hover {
-  background: #666;
+  background: #e3a535;
 }
 
 .generate-btn i {
@@ -324,22 +322,18 @@ body {
 }
 
 /* === RTL SUPPORT === */
-
 body.rtl {
   direction: rtl;
 }
 
-/* Header layout */
 body.rtl .site-header {
   text-align: right;
 }
 
-/* Category select alignment */
 body.rtl .search-section select {
   text-align: right;
 }
 
-/* Products grid: reverse layout */
 body.rtl .products-grid {
   direction: rtl;
 }
@@ -353,7 +347,6 @@ body.rtl .product-description-overlay {
   text-align: right;
 }
 
-/* Selected products area */
 body.rtl .selected-products {
   text-align: right;
 }
@@ -363,7 +356,6 @@ body.rtl .selected-product-item {
   text-align: right;
 }
 
-/* Chat area */
 body.rtl .chatbox {
   text-align: right;
 }
@@ -377,7 +369,6 @@ body.rtl .chat-form input {
   direction: rtl;
 }
 
-/* Optional: footer and nav */
 body.rtl .site-footer {
   text-align: right;
 }
