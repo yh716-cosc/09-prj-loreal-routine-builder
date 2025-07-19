@@ -186,7 +186,16 @@ body {
   display: flex;
   gap: 15px;
   min-height: 160px;
+  cursor: pointer; /* Show hand cursor on hover */
+  transition: box-shadow 0.2s, border 0.2s;
+  position: relative; /* Needed for overlay positioning */
 }
+
+/*
+.product-card:hover {
+  box-shadow: 0 0 12px #0078d744;
+  border: 2px solid #0078d7;
+}*/
 
 .product-card img {
   width: 110px;
@@ -211,6 +220,39 @@ body {
 .product-card p {
   font-size: 14px;
   color: #666;
+}
+
+.product-description-overlay {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  font-size: 15px;
+  padding: 18px 14px;
+  border-radius: 4px;
+  z-index: 2;
+  box-sizing: border-box;
+  overflow-y: auto;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.product-card:hover .product-description-overlay,
+.product-card:focus-within .product-description-overlay {
+  display: block;
+  pointer-events: auto;
+  opacity: 1;
+}
+
+/* Optional: visually hide the rest of the card when overlay is shown */
+.product-card:hover > *:not(.product-description-overlay),
+.product-card:focus-within > *:not(.product-description-overlay) {
+  opacity: 0.2;
+  transition: opacity 0.2s;
 }
 
 /* selected products */
